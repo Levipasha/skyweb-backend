@@ -35,7 +35,7 @@ app.use('/api/', limiter);
 // CORS configuration
 const allowedOrigins = [
   'http://localhost:3000',
-  'http://localhost:3001',
+  'https://www.skywebdev.xyz',
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
