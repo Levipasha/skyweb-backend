@@ -5,6 +5,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const { verifySmtp, getSmtpConfigSummary } = require('./utils/email');
 
 // Load environment variables
 dotenv.config();
@@ -87,6 +88,22 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// SMTP health route (diagnostics)
+app.get('/api/health/smtp', async (req, res) => {
+  const hasSmtp = !!(process.env.SMTP_USER && process.env.SMTP_PASS);
+  if (!hasSmtp) {
+    return res.status(200).json({ success: false, configured: false, message: 'SMTP env vars missing' });
+  }
+  const result = await verifySmtp();
+  res.status(result.ok ? 200 : 500).json({ success: result.ok, configured: true, message: result.message });
+});
+
+// SMTP config snapshot (sanitized)
+app.get('/api/health/smtp/config', (req, res) => {
+  const summary = getSmtpConfigSummary();
+  res.json({ success: true, config: summary });
+});
+
 // Root route
 app.get('/', (req, res) => {
   res.json({
@@ -126,6 +143,17 @@ mongoose
   .connect(MONGODB_URI)
   .then(() => {
     console.log('✅ MongoDB connected successfully');
+    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+      verifySmtp().then((r) => {
+        if (r.ok) {
+          console.log('✉️  SMTP:', r.message);
+        } else {
+          console.error('✉️  SMTP verify failed:', r.message);
+        }
+      }).catch((e) => console.error('✉️  SMTP verify error:', e));
+    } else {
+      console.log('✉️  SMTP: Not configured (missing SMTP_USER/SMTP_PASS)');
+    }
     
     // Start server
     app.listen(PORT, () => {

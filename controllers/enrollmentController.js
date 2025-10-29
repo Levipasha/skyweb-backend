@@ -1,5 +1,6 @@
 const InternshipEnrollment = require('../models/InternshipEnrollment');
 const Internship = require('../models/Internship');
+const { sendMail, buildAppliedEmail } = require('../utils/email');
 
 // @desc    Create internship enrollment (Public - from website)
 // @route   POST /api/enrollments
@@ -59,7 +60,30 @@ exports.createEnrollment = async (req, res) => {
     await Internship.findByIdAndUpdate(internshipId, {
       $inc: { enrollmentCount: 1 },
     });
-    
+
+    // Send confirmation email (non-blocking)
+    (async () => {
+      try {
+        const html = buildAppliedEmail({
+          applicantName: name,
+          internshipTitle: internship.title,
+          duration: internship.duration,
+          location: internship.location,
+          stipend: internship.stipend,
+          resumeLink,
+        });
+
+        await sendMail({
+          to: email,
+          subject: `Application received – ${internship.title} | SkyWeb`,
+          text: `Hi ${name},\n\nThank you for applying for the ${internship.title} internship at SkyWeb. We have received your application.\n\nDuration: ${internship.duration || '-'}\nLocation: ${internship.location || '-'}\nStipend: ${internship.stipend || '-'}\n\nYour resume: ${resumeLink}\n\n— SkyWeb`,
+          html,
+        });
+      } catch (mailErr) {
+        console.error('Email send error:', mailErr);
+      }
+    })();
+
     res.status(201).json({
       success: true,
       data: enrollment,

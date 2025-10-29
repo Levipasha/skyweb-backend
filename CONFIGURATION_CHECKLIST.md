@@ -77,6 +77,26 @@ ADMIN_PASSWORD=Admin@123     # ✅ Keep as is (change after first login)
 FRONTEND_URL=http://localhost:3000 # ✅ Keep as is
 ```
 
+### 3.1 SMTP (Email) — Applicant confirmation mails
+
+To send confirmation emails via Gmail when a student applies, add these to your `.env`:
+
+```env
+# SMTP / Gmail
+SMTP_USER=yourgmail@gmail.com        # Sender Gmail address
+SMTP_PASS=rryz hzvz gefl zfyl smptp  # Gmail App Password (paste exactly)
+SMTP_HOST=smtp.gmail.com             # Optional (defaults to smtp.gmail.com)
+SMTP_PORT=465                        # Optional (465 for SSL, or 587 for TLS)
+SMTP_SECURE=true                     # true for 465, false for 587
+SMTP_FROM_NAME=SkyWeb Careers        # Optional display name
+SMTP_FROM_EMAIL=yourgmail@gmail.com  # Optional (defaults to SMTP_USER)
+SMTP_LOGO_URL=https://www.skywebdev.xyz/favicon.png # Optional logo in emails
+```
+
+Notes:
+- Use a Gmail App Password (not your normal password). Enable 2-Step Verification in your Google Account, then create an App Password.
+- If you prefer port 587, set `SMTP_PORT=587` and `SMTP_SECURE=false`.
+
 ### 4. Generate JWT Secret
 
 Choose ONE method to generate a secure JWT secret:
