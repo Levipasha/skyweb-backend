@@ -39,7 +39,7 @@ app.use('/api/', limiter);
 const allowedOrigins = [
   'http://localhost:3000',
   'https://www.skywebdev.xyz', // Admin panel
-  'http://localhost:5000',
+  'https://main.d367ltk4r3pmzb.amplifyapp.com',
   process.env.FRONTEND_URL,
   process.env.ADMIN_PANEL_URL
 ].filter(Boolean);
